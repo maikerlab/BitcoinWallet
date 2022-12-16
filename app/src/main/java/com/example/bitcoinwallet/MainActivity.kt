@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         wallet.restoreFromSeedWords(seedWords.joinToString(" "))
-        binding.tvWalletStatus.text = getString(R.string.wallet_loaded, wallet.fingerprint)
+        binding.tvWallet.text = getString(R.string.wallet_loaded, wallet.fingerprint)
     }
 
     companion object {
@@ -54,8 +54,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnCreateWallet.setOnClickListener {
-            val intent = WalletActivity.getIntent(this, null)
-            startActivity(intent)
+            wallet.createNewWallet()
         }
 
         binding.btnLoadWallet.setOnClickListener {

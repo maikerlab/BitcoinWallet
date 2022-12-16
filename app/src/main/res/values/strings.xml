@@ -2,8 +2,8 @@
     <string name="app_name">Bitcoin Wallet</string>
     <string name="load_wallet">Load existing</string>
     <string name="create_wallet">Create\nnew</string>
-    <string name="balance_sats">Balance: %d sats</string>
-    <string name="network">Network: %s</string>
+    <string name="balance_sats">%d sats</string>
+    <string name="network">%s</string>
     <string name="address">%s</string>
     <string name="wallet_loaded">Wallet loaded. Fingerprint: %s</string>
     <string name="title_activity_wallet">WalletActivity</string>
