@@ -1,4 +1,4 @@
-package com.example.bitcoinwallet
+package com.example.bitcoinwallet.btc
 
 import android.util.Log
 import org.bitcoindevkit.*
