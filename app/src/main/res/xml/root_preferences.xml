@@ -1,0 +1,19 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/network_header">
+
+        <EditTextPreference
+            app:key="node_url"
+            app:title="@string/electrum_url"
+            app:defaultValue="ssl://electrum.blockstream.info:60002"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="mempool_url"
+            app:title="@string/mempool_url"
+            app:defaultValue="https://mempool.space/api/v1"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
