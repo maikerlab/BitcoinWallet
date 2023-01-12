@@ -6,8 +6,27 @@ import androidx.lifecycle.ViewModel
 
 class MempoolViewModel : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is Mempool Fragment"
+    companion object {
+        const val TAG = "MempoolViewModel"
     }
-    val text: LiveData<String> = _text
+
+    var mempoolUrl: String = "https://mempool.space/api/v1"
+    private var service: MempoolApiService? = null
+
+    private val _difficulty = MutableLiveData<DifficultyAdjustment>()
+    val difficulty: LiveData<DifficultyAdjustment>
+        get() = _difficulty
+
+    fun initAPI(mempoolUrl: String) {
+        this.mempoolUrl = mempoolUrl
+        service = MempoolApiService.create(mempoolUrl)
+    }
+
+    suspend fun getDifficulty() {
+        val dif = service?.getDifficultyAdjustment()
+        if (dif != null) {
+            _difficulty.postValue(dif!!)
+        }
+    }
+
 }
