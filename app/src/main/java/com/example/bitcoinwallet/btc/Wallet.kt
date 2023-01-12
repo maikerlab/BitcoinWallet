@@ -3,6 +3,7 @@ package com.example.bitcoinwallet.btc
 import android.util.Log
 import com.example.bitcoinwallet.ui.wallet.WalletViewModel
 import org.bitcoindevkit.*
+import kotlin.concurrent.thread
 import org.bitcoindevkit.Wallet as BdkWallet
 
 data class WalletConfig(val dbPath: String, val electrumUrl: String? = null)

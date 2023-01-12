@@ -13,6 +13,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
 import com.example.bitcoinwallet.R
 import com.example.bitcoinwallet.databinding.FragmentWalletBinding
+import kotlin.concurrent.thread
 
 class WalletFragment : Fragment() {
 
@@ -43,8 +44,9 @@ class WalletFragment : Fragment() {
         viewModel = ViewModelProvider(requireActivity())[WalletViewModel::class.java]
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
-            if (state == WalletViewModel.WalletStatus.LOADED) {
-                binding.tvFingerprint.text = viewModel.getFingerPrint()
+            when(state) {
+                WalletViewModel.WalletStatus.LOADED -> binding.tvFingerprint.text = viewModel.getFingerPrint()
+                else -> Log.d(TAG, "new state: ${state.name}")
             }
         }
         viewModel.network.observe(viewLifecycleOwner) {
@@ -65,13 +67,14 @@ class WalletFragment : Fragment() {
         }
 
         binding.fabRefreshWallet.setOnClickListener {
-            viewModel.syncWallet()
-            viewModel.updateBalance()
-            viewModel.updateBlockHeight()
+            updateWalletInfo()
         }
 
         binding.btnNewAddress.setOnClickListener {
             viewModel.getNewAddress()
+        }
+        binding.btnLastUnusedAddress.setOnClickListener {
+            viewModel.getLastUnusedAddress()
         }
 
         return binding.root
@@ -83,9 +86,21 @@ class WalletFragment : Fragment() {
             val key = args.key
             Log.d(TAG, "Loaded wallet with fingerprint $key)")
             viewModel.loadWalletFromFingerprint(key)
+            binding.tvFingerprint.text = viewModel.getFingerPrint()
+            updateWalletInfo()
         } catch (e: Exception) {
             Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_nav_wallet_to_nav_wallet_start)
+        }
+    }
+
+    private fun updateWalletInfo() {
+        if (viewModel.state.value == WalletViewModel.WalletStatus.SYNCING) {
+            Toast.makeText(activity, "Wallet is syncing - please wait!", Toast.LENGTH_SHORT).show()
+        } else {
+            viewModel.updateBalance()
+            viewModel.updateBlockHeight()
+            viewModel.syncWallet()
         }
     }
 

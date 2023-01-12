@@ -8,11 +8,12 @@ import com.example.bitcoinwallet.btc.Wallet
 import com.example.bitcoinwallet.btc.WalletConfig
 import org.bitcoindevkit.AddressIndex
 import org.bitcoindevkit.Network
+import kotlin.concurrent.thread
 
 class WalletViewModel : ViewModel() {
 
     enum class WalletStatus {
-        LOADING, LOADED
+        LOADING, LOADED, SYNCING, READY
     }
 
     private lateinit var wallet: Wallet
@@ -59,8 +60,6 @@ class WalletViewModel : ViewModel() {
         val fingerprint = wallet.fingerprint
         val newKey = addKey(fingerprint, seedWords)
         _state.postValue(WalletStatus.LOADED)
-        _balance.postValue(wallet.getBalance())
-        _syncProgress.postValue(100)
         getNewAddress()
         return newKey
     }
@@ -107,21 +106,29 @@ class WalletViewModel : ViewModel() {
     }
 
     fun syncWallet() {
-        wallet.sync()
-        // TODO: can we get the Blockchain sync. progress here?
-        _syncProgress.postValue(100)
+        _state.postValue(WalletStatus.SYNCING)
+        thread {
+            wallet.sync()
+            // TODO: can we get the Blockchain sync. progress here?
+            _syncProgress.postValue(100)
+            _state.postValue(WalletStatus.READY)
+        }
     }
 
     fun updateBalance() {
-        val balance = wallet.getBalance()
-        Log.d(TAG, "updateBalance: $balance")
-        _balance.postValue(balance)
+        thread {
+            val balance = wallet.getBalance()
+            Log.d(TAG, "updateBalance: $balance")
+            _balance.postValue(balance)
+        }
     }
 
     fun updateBlockHeight() {
-        val height: UInt = wallet.getBlockHeight() ?: 0U
-        Log.d(TAG, "updateBlockHeight: $height")
-        _blockHeight.postValue(height)
+        thread {
+            val height: UInt = wallet.getBlockHeight() ?: 0U
+            Log.d(TAG, "updateBlockHeight: $height")
+            _blockHeight.postValue(height)
+        }
     }
 
 }
