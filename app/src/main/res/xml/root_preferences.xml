@@ -3,7 +3,7 @@
     <PreferenceCategory app:title="@string/network_header">
 
         <EditTextPreference
-            app:key="node_url"
+            app:key="electrum_url"
             app:title="@string/electrum_url"
             app:defaultValue="ssl://electrum.blockstream.info:60002"
             app:useSimpleSummaryProvider="true" />

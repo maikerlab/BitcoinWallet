@@ -22,6 +22,7 @@ class MempoolFragment : Fragment() {
 
     companion object {
         const val TAG = "MempoolFragment"
+        const val PREF_MEMPOOL_URL = "mempool_url"
     }
 
     override fun onCreateView(
@@ -43,8 +44,9 @@ class MempoolFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // https://developer.android.com/develop/ui/views/components/settings/use-saved-values
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
-        val url = sharedPreferences.getString("mempool_url", "https://mempool.space/api/v1")
+        val url = sharedPreferences.getString(PREF_MEMPOOL_URL, "https://mempool.space/api/v1")
         Log.d(TAG, "Mempool URL: $url")
     }
 

@@ -10,11 +10,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bitcoinwallet.R
+import com.example.bitcoinwallet.SettingsActivity.Companion.PREF_ELECTRUM_URL
 import com.example.bitcoinwallet.btc.CompactQR
 import com.example.bitcoinwallet.btc.Wordlist
 import com.example.bitcoinwallet.databinding.FragmentWalletStartBinding
+import com.example.bitcoinwallet.ui.mempool.MempoolFragment
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import org.bitcoindevkit.Network
@@ -60,7 +63,10 @@ class WalletStartFragment : Fragment() {
 
     private fun initWallet() {
         Log.d(TAG, "initWallet")
-        viewModel.initWallet(activity?.applicationContext?.filesDir.toString(), Network.TESTNET)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
+        val url = sharedPreferences.getString(PREF_ELECTRUM_URL, null)
+        Log.d(TAG, "Electrum URL: $url")
+        viewModel.initWallet(activity?.applicationContext?.filesDir.toString(), Network.TESTNET, url)
         val wordlist = resources.openRawResource(R.raw.bip39_wordlist_en).bufferedReader()
         Wordlist.words = wordlist.readLines()
         wordlist.close()

@@ -1,16 +1,18 @@
 package com.example.bitcoinwallet.btc
 
 import android.util.Log
+import com.example.bitcoinwallet.ui.wallet.WalletViewModel
 import org.bitcoindevkit.*
 import org.bitcoindevkit.Wallet as BdkWallet
 
-data class WalletConfig(val dbPath: String)
+data class WalletConfig(val dbPath: String, val electrumUrl: String? = null)
 
 class Wallet private constructor(private val config: WalletConfig?) {
 
     private lateinit var bdkWallet: BdkWallet
     private var electrumURL: String = "ssl://electrum.blockstream.info:60002"
     var fingerprint: String = ""
+    private var blockchain: Blockchain? = null
 
     companion object {
         const val TAG = "Wallet"
@@ -23,10 +25,8 @@ class Wallet private constructor(private val config: WalletConfig?) {
         }
     }
 
-    object LogProgress: Progress {
-        override fun update(progress: Float, message: String?) {
-            Log.i(TAG, "Sync wallet")
-        }
+    init {
+        electrumURL = config?.electrumUrl ?: "ssl://electrum.blockstream.info:60002"
     }
 
     fun createNewWallet(): Array<String> {
@@ -65,7 +65,6 @@ class Wallet private constructor(private val config: WalletConfig?) {
         // TODO: App crashes when using SQLite
         val sqliteDatabaseConfig = DatabaseConfig.Sqlite(SqliteDbConfiguration("${config?.dbPath}/bdk.sqlite"))
         val inMemoryConfig = DatabaseConfig.Memory
-
         bdkWallet = BdkWallet(
             descriptor = descriptor,
             changeDescriptor = changeDescriptor,
@@ -74,7 +73,8 @@ class Wallet private constructor(private val config: WalletConfig?) {
         )
     }
 
-    fun sync() {
+    fun initBlockchain(electrumUrl: String?) {
+        this.electrumURL = electrumUrl ?: this.electrumURL
         val blockchainConfig: BlockchainConfig = BlockchainConfig.Electrum(
             ElectrumConfig(
                 electrumURL,
@@ -84,13 +84,30 @@ class Wallet private constructor(private val config: WalletConfig?) {
                 10u
             )
         )
-        val blockchain: Blockchain = Blockchain(blockchainConfig)
-        blockchain.getBlockHash((12).toUInt())
-        bdkWallet.sync(blockchain, LogProgress)
+        blockchain = Blockchain(blockchainConfig)
     }
 
-    fun getNewAddress(index: AddressIndex): String {
-        return bdkWallet.getAddress(index).address
+    object LogProgress: Progress {
+        override fun update(progress: Float, message: String?) {
+            Log.i(WalletViewModel.TAG, "Sync wallet - progress_ $progress - message: $message")
+        }
+    }
+
+    fun sync() {
+        if (blockchain != null) {
+            Log.d(TAG, "start syncing wallet (URL: $electrumURL)")
+            blockchain?.let { bdkWallet.sync(it, LogProgress) }
+        }
+    }
+
+    fun getAddress(addressIndex: AddressIndex): String {
+        return bdkWallet.getAddress(addressIndex).address
+    }
+
+    fun getBlockHeight(): UInt? {
+        val blockHeight = blockchain?.getHeight()
+        Log.d(TAG, "Current block height: $blockHeight")
+        return blockHeight
     }
 
     fun getNetwork(): String {

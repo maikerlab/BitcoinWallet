@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="28sp"
-        android:text="My Keys"
+        android:text="@string/my_keys"
         android:layout_marginTop="24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -36,9 +36,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginHorizontal="20dp"
+        android:layout_marginStart="16dp"
+        android:text="Scan SeedQR"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rv_keys"
-        android:text="Restore Key" />
+        app:layout_constraintTop_toBottomOf="@id/rv_keys" />
 
     <Button
         android:id="@+id/btn_wallet_create"

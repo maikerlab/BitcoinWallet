@@ -1,5 +1,6 @@
 package com.example.bitcoinwallet.ui.wallet
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -29,6 +30,10 @@ class WalletViewModel : ViewModel() {
     val syncProgress: LiveData<Int>
         get() = _syncProgress
 
+    private val _blockHeight = MutableLiveData<UInt>()
+    val blockHeight: LiveData<UInt>
+        get() = _blockHeight
+
     private val _balance = MutableLiveData<ULong>()
     val balance: LiveData<ULong>
         get() = _balance
@@ -37,11 +42,16 @@ class WalletViewModel : ViewModel() {
     val address: LiveData<String>
         get() = _address
 
-    fun initWallet(dbPath: String, network: Network) {
-        val config = WalletConfig(dbPath = dbPath)
+    companion object {
+        const val TAG = "WalletViewModel"
+    }
+
+    fun initWallet(dbPath: String, network: Network, customElectrumURL: String?) {
+        val config = WalletConfig(dbPath = dbPath, electrumUrl = customElectrumURL)
         wallet = Wallet.getInstance(config)
         _state.postValue(WalletStatus.LOADING)
         _network.postValue(network)
+        wallet.initBlockchain(customElectrumURL)
     }
 
     fun loadWalletFromSeed(seedWords: Array<String>): Key? {
@@ -74,13 +84,14 @@ class WalletViewModel : ViewModel() {
         return wallet.fingerprint
     }
 
-    fun updateSyncProgress(progress: Int) {
-        _syncProgress.value = progress
+    fun getNewAddress() {
+        val newAddress = wallet.getAddress(AddressIndex.NEW)
+        _address.postValue(newAddress)
     }
 
-    fun getNewAddress() {
-        val newAddress = wallet.getNewAddress(AddressIndex.LAST_UNUSED)
-        _address.postValue(newAddress)
+    fun getLastUnusedAddress() {
+        val address = wallet.getAddress(AddressIndex.LAST_UNUSED)
+        _address.postValue(address)
     }
 
     fun createNewWallet(): Key {
@@ -93,6 +104,24 @@ class WalletViewModel : ViewModel() {
 
     fun getAllKeys(): MutableList<Key> {
         return keys.values.toMutableList()
+    }
+
+    fun syncWallet() {
+        wallet.sync()
+        // TODO: can we get the Blockchain sync. progress here?
+        _syncProgress.postValue(100)
+    }
+
+    fun updateBalance() {
+        val balance = wallet.getBalance()
+        Log.d(TAG, "updateBalance: $balance")
+        _balance.postValue(balance)
+    }
+
+    fun updateBlockHeight() {
+        val height: UInt = wallet.getBlockHeight() ?: 0U
+        Log.d(TAG, "updateBlockHeight: $height")
+        _blockHeight.postValue(height)
     }
 
 }

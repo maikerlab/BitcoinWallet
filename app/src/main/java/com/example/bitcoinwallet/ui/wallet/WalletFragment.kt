@@ -60,9 +60,14 @@ class WalletFragment : Fragment() {
             val len = address.length
             binding.tvAddressVal.text = address.substring(1..5) + "..." + address.substring(len-5..len-1)
         }
+        viewModel.blockHeight.observe(viewLifecycleOwner) { height ->
+            binding.tvBlockHeightVal.text = getString(R.string.block_height_val, height.toInt())
+        }
 
         binding.fabRefreshWallet.setOnClickListener {
-            viewModel.updateSyncProgress(viewModel.syncProgress.value?.plus(1) ?: 0)
+            viewModel.syncWallet()
+            viewModel.updateBalance()
+            viewModel.updateBlockHeight()
         }
 
         binding.btnNewAddress.setOnClickListener {
@@ -74,12 +79,9 @@ class WalletFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
-        val url = sharedPreferences.getString("node_url", "")
-        Log.d(TAG, "Node URL: $url")
         try {
             val key = args.key
-            Log.d(TAG, "Successfully loaded wallet (Fingerprint: $key)")
+            Log.d(TAG, "Loaded wallet with fingerprint $key)")
             viewModel.loadWalletFromFingerprint(key)
         } catch (e: Exception) {
             Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()

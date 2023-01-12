@@ -11,33 +11,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
+        android:text="@string/undefined"
         android:textSize="18sp"
         android:drawableLeft="@drawable/ic_fingerprint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <Button
-        android:id="@+id/btn_new_address"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/get_new_address"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_fingerprint" />
-
     <GridLayout
+        android:id="@+id/gl_wallet_info"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:columnCount="2"
-        android:rowCount="4"
+        android:rowCount="5"
         android:useDefaultMargins="true"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_new_address">
+        app:layout_constraintTop_toBottomOf="@id/tv_fingerprint"
+        >
 
         <TextView
             android:id="@+id/tv_sync_progress"
@@ -54,21 +46,38 @@
             android:layout_row="0"
             android:layout_column="1"
             android:layout_gravity="end"
-            android:text="@string/sync_progress_percent" />
+            android:text="@string/undefined" />
+
+        <TextView
+            android:id="@+id/tv_block_height"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:text="Block Height" />
+
+        <TextView
+            android:id="@+id/tv_block_height_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_row="1"
+            android:layout_column="1"
+            android:layout_gravity="end"
+            android:text="@string/undefined" />
 
         <TextView
             android:id="@+id/tv_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_row="1"
+            android:layout_row="2"
             android:layout_column="0"
-            android:text="Address" />
+            android:text="Last unused address" />
 
         <TextView
             android:id="@+id/tv_address_val"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_row="1"
+            android:layout_row="2"
             android:layout_column="1"
             android:layout_gravity="end"
             android:text="@string/undefined" />
@@ -77,7 +86,7 @@
             android:id="@+id/tv_network"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_row="2"
+            android:layout_row="3"
             android:layout_column="0"
             android:text="Network" />
 
@@ -85,7 +94,7 @@
             android:id="@+id/tv_network_val"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_row="2"
+            android:layout_row="3"
             android:layout_column="1"
             android:layout_gravity="end"
             android:text="@string/undefined" />
@@ -94,7 +103,7 @@
             android:id="@+id/tv_balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_row="3"
+            android:layout_row="4"
             android:layout_column="0"
             android:text="Balance" />
 
@@ -102,13 +111,23 @@
             android:id="@+id/tv_balance_val"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_row="3"
+            android:layout_row="4"
             android:layout_column="1"
             android:layout_gravity="end"
-            android:text="@string/balance_sats" />
+            android:text="@string/undefined" />
 
     </GridLayout>
 
+    <Button
+        android:id="@+id/btn_new_address"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/get_new_address"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gl_wallet_info" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_refresh_wallet"

@@ -6,6 +6,10 @@ import androidx.preference.PreferenceFragmentCompat
 
 class SettingsActivity : AppCompatActivity() {
 
+    companion object {
+        const val PREF_ELECTRUM_URL = "electrum_url"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
