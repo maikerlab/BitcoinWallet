@@ -4,14 +4,15 @@
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/bitcoin_orange</item>
         <item name="colorPrimaryVariant">@color/bitcoin_orange</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/black</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/bitcoin_orange</item>
         <item name="colorSecondaryVariant">@color/bitcoin_orange</item>
-        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="android:drawableTint">?colorOnPrimary</item>
     </style>
 
     <style name="Theme.BDKWallet.NoActionBar">

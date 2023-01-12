@@ -1,73 +1,87 @@
 package com.example.bitcoinwallet.ui.wallet
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.bitcoinwallet.R
-import com.example.bitcoinwallet.btc.CompactQR
-import com.example.bitcoinwallet.btc.Wallet
-import com.example.bitcoinwallet.btc.WalletConfig
 import com.example.bitcoinwallet.btc.Wordlist
 import com.example.bitcoinwallet.databinding.FragmentWalletBinding
-import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanOptions
 
 class WalletFragment : Fragment() {
 
     private var _binding: FragmentWalletBinding? = null
-    private lateinit var wallet: Wallet
+    val args: WalletFragmentArgs by navArgs()
+    private lateinit var viewModel: WalletViewModel
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    companion object {
+        const val TAG = "WalletFragment"
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate: WalletFragment")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val walletViewModel =
-            ViewModelProvider(this).get(WalletViewModel::class.java)
-
         _binding = FragmentWalletBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
-        walletViewModel.network.observe(viewLifecycleOwner) {
-            binding.tvNetworkVal.text = it
+        viewModel = ViewModelProvider(requireActivity())[WalletViewModel::class.java]
+
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            if (state == WalletViewModel.WalletStatus.LOADED) {
+                binding.tvFingerprint.text = viewModel.getFingerPrint()
+            }
         }
-        walletViewModel.syncProgress.observe(viewLifecycleOwner) {
-            binding.tvSyncProgressVal.text = it.toString()
+        viewModel.network.observe(viewLifecycleOwner) {
+            binding.tvNetworkVal.text = it.name.lowercase().replaceFirstChar { c -> c.uppercase() }
         }
-        walletViewModel.balance.observe(viewLifecycleOwner) {
-            binding.tvBalanceVal.text = getString(R.string.balance_sats, it)
+        viewModel.syncProgress.observe(viewLifecycleOwner) { progress ->
+            binding.tvSyncProgressVal.text = getString(R.string.sync_progress_percent, progress)
+        }
+        viewModel.balance.observe(viewLifecycleOwner) { sats ->
+            binding.tvBalanceVal.text = getString(R.string.balance_sats, sats.toString())
+        }
+        viewModel.address.observe(viewLifecycleOwner) { address ->
+            val len = address.length
+            binding.tvAddressVal.text = address.substring(1..5) + "..." + address.substring(len-5..len-1)
         }
 
         binding.fabRefreshWallet.setOnClickListener {
-            walletViewModel.updateSyncProgress(walletViewModel.syncProgress.value?.plus(1) ?: 0)
+            viewModel.updateSyncProgress(viewModel.syncProgress.value?.plus(1) ?: 0)
         }
 
-        binding.btnLoadWallet.setOnClickListener {
-            val options = ScanOptions()
-            options.run {
-                setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                setPrompt("Scan CompactQR code")
-                setBeepEnabled(false)
-                setOrientationLocked(false)
-            }
-            barcodeLauncher.launch(options)
+        binding.btnNewAddress.setOnClickListener {
+            viewModel.getNewAddress()
         }
 
-        val config = WalletConfig(dbPath = activity?.applicationContext?.filesDir.toString())
-        wallet = Wallet.getInstance(config)
+        return binding.root
+    }
 
-        initWordlist()
-
-        return root
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        try {
+            val seedWords = args.seedWords
+            viewModel.loadWallet(seedWords)
+            Log.d(TAG, "Successfully loaded wallet (${seedWords.size} words)")
+        } catch (e: Exception) {
+            Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_nav_wallet_to_nav_wallet_start)
+        }
     }
 
     override fun onDestroyView() {
@@ -75,29 +89,4 @@ class WalletFragment : Fragment() {
         _binding = null
     }
 
-    private val barcodeLauncher: ActivityResultLauncher<ScanOptions> = registerForActivityResult(
-        ScanContract()
-    ) { result ->
-        run {
-            if (result.contents == null) {
-                Toast.makeText(activity, "Cancelled", Toast.LENGTH_LONG).show()
-            } else {
-                loadWallet(result.contents)
-            }
-        }
-    }
-
-    private fun initWordlist() {
-        val wordlist = resources.openRawResource(R.raw.bip39_wordlist_en).bufferedReader()
-        Wordlist.words = wordlist.readLines()
-        wordlist.close()
-    }
-
-    private fun createNewWallet() {
-    }
-
-    private fun loadWallet(qrRaw: String) {
-        val seedWords = CompactQR.decodeQrCode(qrRaw)
-        wallet.restoreFromSeedWords(seedWords.joinToString(" "))
-    }
 }

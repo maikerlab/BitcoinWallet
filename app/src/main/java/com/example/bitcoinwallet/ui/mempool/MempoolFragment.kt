@@ -22,8 +22,7 @@ class MempoolFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val mempoolViewModel =
-            ViewModelProvider(this).get(MempoolViewModel::class.java)
+        val mempoolViewModel = ViewModelProvider(requireActivity())[MempoolViewModel::class.java]
 
         _binding = FragmentMempoolBinding.inflate(inflater, container, false)
         val root: View = binding.root

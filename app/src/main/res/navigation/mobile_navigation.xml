@@ -12,10 +12,27 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
+        android:id="@+id/nav_wallet_start"
+        android:name="com.example.bitcoinwallet.ui.wallet.WalletStartFragment"
+        android:label="@string/menu_wallet"
+        tools:layout="@layout/fragment_wallet_start" >
+        <action
+            android:id="@+id/action_nav_wallet_start_to_nav_wallet"
+            app:destination="@id/nav_wallet" />
+    </fragment>
+
+    <fragment
         android:id="@+id/nav_wallet"
         android:name="com.example.bitcoinwallet.ui.wallet.WalletFragment"
         android:label="@string/menu_wallet"
-        tools:layout="@layout/fragment_wallet" />
+        tools:layout="@layout/fragment_wallet" >
+        <action
+            android:id="@+id/action_nav_wallet_to_nav_wallet_start"
+            app:destination="@id/nav_wallet_start" />
+        <argument
+            android:name="seed_words"
+            app:argType="string[]" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_mempool"

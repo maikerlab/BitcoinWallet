@@ -35,8 +35,8 @@ class Wallet private constructor(private val config: WalletConfig?) {
         loadWallet(mnemonic)
     }
 
-    fun restoreFromSeedWords(seedWords: String) {
-        val mnemonic = Mnemonic.fromString(seedWords)
+    fun restoreFromSeedWords(seedWords: Array<String>) {
+        val mnemonic = Mnemonic.fromString(seedWords.joinToString(" "))
         loadWallet(mnemonic)
     }
 
@@ -88,8 +88,8 @@ class Wallet private constructor(private val config: WalletConfig?) {
         bdkWallet.sync(blockchain, LogProgress)
     }
 
-    fun getNewAddress(): String {
-        return bdkWallet.getAddress(AddressIndex.NEW).address
+    fun getNewAddress(index: AddressIndex): String {
+        return bdkWallet.getAddress(index).address
     }
 
     fun getNetwork(): String {

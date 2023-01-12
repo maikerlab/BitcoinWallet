@@ -9,7 +9,7 @@
             android:icon="@drawable/ic_menu_home"
             android:title="@string/menu_home" />
         <item
-            android:id="@+id/nav_wallet"
+            android:id="@+id/nav_wallet_start"
             android:icon="@drawable/ic_menu_wallet"
             android:title="@string/menu_wallet" />
         <item

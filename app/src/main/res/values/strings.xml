@@ -10,9 +10,13 @@
     <string name="menu_home">Home</string>
     <string name="menu_wallet">Wallet</string>
     <string name="menu_mempool">Mempool</string>
-    <string name="balance_sats">%d sats</string>
+    <string name="balance_sats">%s sats</string>
     <string name="network">Testnet</string>
     <string name="address">tb1...</string>
     <string name="get_new_address">Get new address</string>
     <string name="sync_wallet">Sync</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="undefined">-</string>
+    <string name="sync_progress_percent">%d %%</string>
 </resources>
