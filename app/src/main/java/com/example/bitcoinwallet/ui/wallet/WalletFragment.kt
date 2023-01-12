@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.bitcoinwallet.R
-import com.example.bitcoinwallet.btc.Wordlist
 import com.example.bitcoinwallet.databinding.FragmentWalletBinding
 
 class WalletFragment : Fragment() {
@@ -75,9 +74,9 @@ class WalletFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         try {
-            val seedWords = args.seedWords
-            viewModel.loadWallet(seedWords)
-            Log.d(TAG, "Successfully loaded wallet (${seedWords.size} words)")
+            val key = args.key
+            Log.d(TAG, "Successfully loaded wallet (Fingerprint: $key)")
+            viewModel.loadWalletFromFingerprint(key)
         } catch (e: Exception) {
             Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_nav_wallet_to_nav_wallet_start)

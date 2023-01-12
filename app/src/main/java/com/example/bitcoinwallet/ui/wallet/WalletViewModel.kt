@@ -43,7 +43,18 @@ class WalletViewModel : ViewModel() {
         _network.postValue(network)
     }
 
-    fun loadWallet(seedWords: Array<String>) {
+    fun loadWalletFromSeed(seedWords: Array<String>) {
+        // TODO: Load wallet and store locally if not existent
+        wallet.restoreFromSeedWords(seedWords)
+        _state.postValue(WalletStatus.LOADED)
+        _balance.postValue(wallet.getBalance())
+        _syncProgress.postValue(100)
+        getNewAddress()
+    }
+
+    fun loadWalletFromFingerprint(fingerprint: String) {
+        // TODO: Load from local database
+        val seedWords = arrayOf("vacuum bridge buddy supreme exclude milk consider tail expand wasp pattern nuclear")
         wallet.restoreFromSeedWords(seedWords)
         _state.postValue(WalletStatus.LOADED)
         _balance.postValue(wallet.getBalance())
@@ -62,6 +73,10 @@ class WalletViewModel : ViewModel() {
     fun getNewAddress() {
         val newAddress = wallet.getNewAddress(AddressIndex.LAST_UNUSED)
         _address.postValue(newAddress)
+    }
+
+    fun createNewWallet() {
+        wallet.createNewWallet()
     }
 
 }

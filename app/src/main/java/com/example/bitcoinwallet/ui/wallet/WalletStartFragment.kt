@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bitcoinwallet.R
 import com.example.bitcoinwallet.btc.CompactQR
 import com.example.bitcoinwallet.btc.Wordlist
@@ -37,6 +38,23 @@ class WalletStartFragment : Fragment() {
     ): View {
         binding = FragmentWalletStartBinding.inflate(layoutInflater)
 
+        val keys = mutableListOf<Key>(
+            Key("67f90ffc"),
+            Key("7ad928fa"),
+            Key("17da92jd")
+        )
+        binding.rvKeys.run {
+            val context = activity?.applicationContext
+            adapter = context?.let { KeysAdapter(it, keys) }
+            layoutManager = context?.let {
+                LinearLayoutManager(
+                    it,
+                    LinearLayoutManager.VERTICAL,
+                    false
+                )
+            }
+        }
+
         viewModel = ViewModelProvider(requireActivity())[WalletViewModel::class.java]
         initWallet()
 
@@ -44,6 +62,7 @@ class WalletStartFragment : Fragment() {
     }
 
     private fun initWallet() {
+        Log.d(TAG, "initWallet")
         viewModel.initWallet(activity?.applicationContext?.filesDir.toString(), Network.TESTNET)
         val wordlist = resources.openRawResource(R.raw.bip39_wordlist_en).bufferedReader()
         Wordlist.words = wordlist.readLines()
@@ -63,7 +82,9 @@ class WalletStartFragment : Fragment() {
                     if (seedWords.size != 12 && seedWords.size != 24) {
                         throw IllegalArgumentException("Invalid number of seed words")
                     } else {
-                        val action = WalletStartFragmentDirections.actionNavWalletStartToNavWallet(seedWords)
+                        viewModel.loadWalletFromSeed(seedWords)
+                        val fingerprint = viewModel.getFingerPrint()
+                        val action = WalletStartFragmentDirections.actionNavWalletStartToNavWallet(fingerprint)
                         findNavController().navigate(action)
                     }
                 } catch (e: Exception) {
@@ -88,8 +109,9 @@ class WalletStartFragment : Fragment() {
         }
 
         binding.btnWalletCreate.setOnClickListener {
-            val seedWords = arrayOf("vacuum bridge buddy supreme exclude milk consider tail expand wasp pattern nuclear")
-            val action = WalletStartFragmentDirections.actionNavWalletStartToNavWallet(seedWords)
+            viewModel.createNewWallet()
+            val fingerprint = viewModel.getFingerPrint()
+            val action = WalletStartFragmentDirections.actionNavWalletStartToNavWallet(fingerprint)
             findNavController().navigate(action)
         }
     }

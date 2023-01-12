@@ -30,8 +30,8 @@
             android:id="@+id/action_nav_wallet_to_nav_wallet_start"
             app:destination="@id/nav_wallet_start" />
         <argument
-            android:name="seed_words"
-            app:argType="string[]" />
+            android:name="key"
+            app:argType="string" />
     </fragment>
 
     <fragment
