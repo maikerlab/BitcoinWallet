@@ -29,10 +29,11 @@ class Wallet private constructor(private val config: WalletConfig?) {
         }
     }
 
-    fun createNewWallet() {
+    fun createNewWallet(): Array<String> {
         // Create mnemonic
         val mnemonic = Mnemonic(WordCount.WORDS12)
         loadWallet(mnemonic)
+        return mnemonic.asString().split(" ").toTypedArray()
     }
 
     fun restoreFromSeedWords(seedWords: Array<String>) {

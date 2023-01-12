@@ -15,6 +15,7 @@ class WalletViewModel : ViewModel() {
     }
 
     private lateinit var wallet: Wallet
+    private val keys = mutableMapOf<String, Key>()
 
     private val _state = MutableLiveData<WalletStatus>(WalletStatus.LOADING)
     val state: LiveData<WalletStatus>
@@ -43,23 +44,30 @@ class WalletViewModel : ViewModel() {
         _network.postValue(network)
     }
 
-    fun loadWalletFromSeed(seedWords: Array<String>) {
-        // TODO: Load wallet and store locally if not existent
+    fun loadWalletFromSeed(seedWords: Array<String>): Key? {
         wallet.restoreFromSeedWords(seedWords)
+        val fingerprint = wallet.fingerprint
+        val newKey = addKey(fingerprint, seedWords)
         _state.postValue(WalletStatus.LOADED)
         _balance.postValue(wallet.getBalance())
         _syncProgress.postValue(100)
         getNewAddress()
+        return newKey
     }
 
     fun loadWalletFromFingerprint(fingerprint: String) {
-        // TODO: Load from local database
-        val seedWords = arrayOf("vacuum bridge buddy supreme exclude milk consider tail expand wasp pattern nuclear")
-        wallet.restoreFromSeedWords(seedWords)
-        _state.postValue(WalletStatus.LOADED)
-        _balance.postValue(wallet.getBalance())
-        _syncProgress.postValue(100)
-        getNewAddress()
+        if (!keys.containsKey(fingerprint))
+            throw IllegalArgumentException("A key with fingerprint $fingerprint does not exist")
+        val seedWords = keys[fingerprint]?.seedWords!!
+        loadWalletFromSeed(seedWords)
+    }
+    
+    private fun addKey(fingerprint: String, seedWords: Array<String>): Key? {
+        if (keys.containsKey(fingerprint) && keys[fingerprint]?.seedWords.contentEquals(seedWords))
+            return null
+        val key = Key(fingerprint, seedWords)
+        keys[fingerprint] = key
+        return key
     }
 
     fun getFingerPrint(): String {
@@ -75,8 +83,16 @@ class WalletViewModel : ViewModel() {
         _address.postValue(newAddress)
     }
 
-    fun createNewWallet() {
-        wallet.createNewWallet()
+    fun createNewWallet(): Key {
+        val seedWords = wallet.createNewWallet()
+        val fingerprint = wallet.fingerprint
+        val key = Key(fingerprint, seedWords)
+        keys[fingerprint] = key
+        return key
+    }
+
+    fun getAllKeys(): MutableList<Key> {
+        return keys.values.toMutableList()
     }
 
 }

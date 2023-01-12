@@ -1,5 +1,6 @@
 package com.example.bitcoinwallet.ui.wallet
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -9,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bitcoinwallet.R
 import com.example.bitcoinwallet.btc.CompactQR
@@ -22,6 +22,7 @@ import org.bitcoindevkit.Network
 class WalletStartFragment : Fragment() {
     private lateinit var binding: FragmentWalletStartBinding
     private lateinit var viewModel: WalletViewModel
+    private var keysList = mutableListOf<Key>()
 
     companion object {
         const val TAG = "WalletStartFragment"
@@ -38,14 +39,13 @@ class WalletStartFragment : Fragment() {
     ): View {
         binding = FragmentWalletStartBinding.inflate(layoutInflater)
 
-        val keys = mutableListOf<Key>(
-            Key("67f90ffc"),
-            Key("7ad928fa"),
-            Key("17da92jd")
-        )
+        viewModel = ViewModelProvider(requireActivity())[WalletViewModel::class.java]
+        initWallet()
+
+        keysList = viewModel.getAllKeys()
         binding.rvKeys.run {
             val context = activity?.applicationContext
-            adapter = context?.let { KeysAdapter(it, keys) }
+            adapter = context?.let { KeysAdapter(it, keysList) }
             layoutManager = context?.let {
                 LinearLayoutManager(
                     it,
@@ -54,9 +54,6 @@ class WalletStartFragment : Fragment() {
                 )
             }
         }
-
-        viewModel = ViewModelProvider(requireActivity())[WalletViewModel::class.java]
-        initWallet()
 
         return binding.root
     }
@@ -82,10 +79,12 @@ class WalletStartFragment : Fragment() {
                     if (seedWords.size != 12 && seedWords.size != 24) {
                         throw IllegalArgumentException("Invalid number of seed words")
                     } else {
-                        viewModel.loadWalletFromSeed(seedWords)
-                        val fingerprint = viewModel.getFingerPrint()
-                        val action = WalletStartFragmentDirections.actionNavWalletStartToNavWallet(fingerprint)
-                        findNavController().navigate(action)
+                        val createdKey = viewModel.loadWalletFromSeed(seedWords)
+                        if (createdKey != null) {
+                            keysList.add(createdKey)
+                            val position = keysList.indexOf(createdKey)
+                            binding.rvKeys.adapter?.notifyItemChanged(position)
+                        }
                     }
                 } catch (e: Exception) {
                     Toast.makeText(activity, "Error loading seed: ${e.message}", Toast.LENGTH_SHORT)
@@ -109,10 +108,17 @@ class WalletStartFragment : Fragment() {
         }
 
         binding.btnWalletCreate.setOnClickListener {
-            viewModel.createNewWallet()
-            val fingerprint = viewModel.getFingerPrint()
-            val action = WalletStartFragmentDirections.actionNavWalletStartToNavWallet(fingerprint)
-            findNavController().navigate(action)
+            val newKey = viewModel.createNewWallet()
+            keysList.add(newKey)
+            val position = keysList.indexOf(newKey)
+            binding.rvKeys.adapter?.notifyItemChanged(position)
+            AlertDialog.Builder(activity)
+                .setTitle("Key was created")
+                .setMessage("Write down your seed words:\n\n" + newKey.seedWords.joinToString(" "))
+                .setPositiveButton("OK") { _, _ -> return@setPositiveButton }
+                .setCancelable(false)
+                .create()
+                .show()
         }
     }
 
